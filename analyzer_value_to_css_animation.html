@@ -9,51 +9,37 @@
 
 
  <script>
-
    	var audioContext = new(window.AudioContext || window.webkitAudioContext) ();
-
-
    	var OSC1 = audioContext.createOscillator();
-    OSC1.type ="sine";
+    OSC1.type ="sawtooth";
     OSC1.frequency.value = 0.1;
-
     var analyser = audioContext.createAnalyser();
    analyser.fftSize = 2048;
-  analyser.smoothingTimeConstant = 0.6;
+  analyser.smoothingTimeConstant = 0.0;
    var bufferLength = analyser.frequencyBinCount;
-   var dataArray = new Uint8Array(bufferLength);
+   var dataArray = new Float32Array(analyser.frequencyBinCount); 
    
     
-
     var VCA = audioContext.createGain ();
     VCA.gain.value = 1;
-
-
     OSC1.connect(VCA);
     OSC1.connect(analyser);
     VCA.connect(audioContext.destination); 
-
-
-
 function start (){
    	OSC1.start(0);
   };
-
 start();
   
   setInterval(
   function connectAudioToHtml () {
-  document.getElementById("datatext").innerHTML = dataArray[1];
-   analyser.getByteTimeDomainData(dataArray);
+  document.getElementById("datatext").innerHTML = dataArray[1]*-10;
+   analyser.getFloatFrequencyData(dataArray);
    console.log("tester =",dataArray[1]);
-  }, 30);
+  }, 100);
   
     // CHANGE OSC1 WAV
  
-
 function waveOsc1 () {
-
-
 switch(OSC1.type) {
    case "sine":
         OSC1.type ="sawtooth"
@@ -71,8 +57,6 @@ switch(OSC1.type) {
  OSC1.type = OSC1.type
 };
 };
-
-
  </script>
 
 
