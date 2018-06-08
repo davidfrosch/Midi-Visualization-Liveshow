@@ -18,12 +18,11 @@
     OSC1.frequency.value = 120;
 
     var analyser = audioContext.createAnalyser();
-    analyser.fftSize = 1024;
-   
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-    analyser.getByteTimeDomainData(dataArray);
-
+   analyser.fftSize = 2048;
+  analyser.smoothingTimeConstant = 0.6;
+   var bufferLength = analyser.frequencyBinCount;
+   var dataArray = new Uint8Array(bufferLength);
+    
 
     var VCA = audioContext.createGain ();
     VCA.gain.value = 1;
@@ -43,8 +42,8 @@ start();
   
   function connectAudioToHtml () {
   document.getElementById("datatext").innerHTML = dataArray;
-   console.log(dataArray);
-   console.log(bufferLength);
+   analyser.getByteTimeDomainData(dataArray);
+   console.log("tester =",dataArray);
   }
   
     // CHANGE OSC1 WAV
