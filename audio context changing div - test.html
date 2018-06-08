@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+ <html>
+   <head>
+      <title> TRYING TO GET ANALYSER DATA</title> 
+      <style>
+      
+ /*#divtester
+{
+  width: 400px;
+  height: 300px;
+  position: absolute;
+  left: 20%;
+  top: 20%;
+  background-color:  rgba(0, 0, 255, 0.3)
+}*/
+
+body{
+  background: black;
+}
+
+#image
+{
+ width: 1000px;
+  height: 600px;
+
+</style>
+  </head>
+  <body>
+
+  <p id="datatext"> hallo </p>
+<div id="divtester">  </div>
+<img id="image" src="1.png">
+
+
+</body>
+
+
+ <script>
+   	var audioContext = new(window.AudioContext || window.webkitAudioContext) ();
+
+    //OSC 1 - LFO and TIMER
+   	var OSC1 = audioContext.createOscillator();
+    OSC1.type ="sawtooth";
+    OSC1.frequency.value = 0.1;
+
+    //LFO 1 - FM-ing OSC 1
+    var LFO1 = audioContext.createOscillator();
+    LFO1.type ="sawtooth";
+    LFO1.frequency.value = 10;
+
+    // OSC 2
+    var OSC2 = audioContext.createOscillator();
+    OSC2.type ="sine";
+    OSC2.frequency.value = 100;
+
+    var OSC3 = audioContext.createOscillator();
+    OSC3.type ="sine";
+    OSC3.frequency.value = 80;
+
+    // ANALYSER
+    var analyser = audioContext.createAnalyser();
+   analyser.fftSize = 4096;
+  analyser.smoothingTimeConstant = 0.99;
+   var bufferLength = analyser.frequencyBinCount;
+   var dataArray = new Float32Array(analyser.frequencyBinCount); 
+   
+    var FMVCA = audioContext.createGain ();
+    FMVCA.gain.value = 150;
+
+   var  LFOVCA = audioContext.createGain ();
+    LFOVCA.gain.value = 10;
+
+    var VCA = audioContext.createGain ();
+    VCA.gain.value = 1;
+
+    OSC2.connect(VCA);
+    OSC3.connect(VCA);
+    OSC1.connect(FMVCA);
+    FMVCA.connect(OSC2.frequency);
+    FMVCA.connect(OSC3.frequency);
+    LFO1.connect(LFOVCA);
+    LFOVCA.connect(OSC1.frequency)
+    OSC1.connect(analyser);
+    VCA.connect(audioContext.destination); 
+
+function start (){
+   	OSC1.start(0);
+    OSC2.start(0);
+    OSC3.start(0);
+    LFO1.start(0);
+  };
+start();
+  
+ setInterval(
+  function connectAudioToHtml () {
+  document.getElementById("datatext").innerHTML = dataArray[1]*-1;
+  analyser.getFloatFrequencyData(dataArray);
+  /*document.getElementById("divtester").style.backgroundColor = "rgba("+ dataArray[2]*-1 +", 120," + dataArray[99]*-1 + ", 1)";
+  document.getElementById("divtester").style.transform = "rotate("+ dataArray[100]* -2 +"deg)";*/
+
+  /// CHANGE PERSPECTIVE
+
+  document.getElementById("image").style.transform = 
+  "rotateX("+ dataArray[1]*-10 +"deg)" + 
+  "rotateY("+ dataArray[100]*-10 +"deg)" + 
+  "rotateY("+ dataArray[100]*-10 +"deg)" + 
+  "rotateZ("+ dataArray[100]*-10 +"deg)" +
+  "perspective(60px)"+"scale(1.5)"; 
+
+  // CHANGE CSS FILTERS
+ 
+
+  document.getElementById("image").style.filter = 
+  "contrast("+ dataArray[1]*-12 +90+"%)" + 
+  "hue-rotate("+ dataArray[100]*-1 +"deg)" + 
+  "invert("+ dataArray[1000]*-1/60 +"%)"; 
+  
+
+   console.log("tester =",dataArray[1]);
+  }, 10);
+  
+  
+  
+
+ </script>
+
+
+</html>
