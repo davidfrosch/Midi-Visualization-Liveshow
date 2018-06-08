@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+ <html>
+   <head>
+      <title> FRISCH'S COMPLEX OSC</title> 
+  </head>
+<body>
+
+</body>
+
+
+ <script>
+
+   	var audioContext = new(window.AudioContext || window.webkitAudioContext) ();
+
+
+   	var VCA = audioContext.createGain ();
+
+   	var OSC1 = audioContext.createOscillator();
+      OSC1.type ="sine";
+      OSC1.frequency.value = 1000;
+
+   
+
+
+      var VCA = audioContext.createGain ();
+      VCA.gain.value = 1;
+
+
+      OSC1.connect(VCA);
+      VCA.connect(audioContext.destination); 
+
+
+
+function start (){
+   	OSC1.start(0);
+  };
+
+
+
+
+
+// OSC FREQ MODULATORS
+
+    function OSC1Freq (){
+var OSC1Frequency = document.getElementById("sliderOSC1").value ;
+OSC1.frequency.value = OSC1Frequency;
+};
+
+    // CHANGE OSC1 WAVE
+
+function waveOsc1 () {
+
+
+switch(OSC1.type) {
+   case "sine":
+        OSC1.type ="sawtooth"
+        document.getElementById("OSCwave").innerHTML = "MOD OSC: SAW";
+        break;
+   case "sawtooth":
+        OSC1.type ="square"
+        document.getElementById("OSCwave").innerHTML = "MOD OSC: SQUARE";
+        break;
+   case "square":
+        OSC1.type ="sine"
+        document.getElementById("OSCwave").innerHTML = "OSC1: SINE";
+        break;
+    default:
+ OSC1.type = OSC1.type
+};
+};
+
+
+ </script>
+
+
+</html>
