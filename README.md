@@ -1,2 +1,2 @@
-# Web_Audio_API_Experiments
+# Web Audio API Experiments
 Synth Experiments using the Web Audio API
