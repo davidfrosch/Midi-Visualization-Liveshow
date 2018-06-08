@@ -3,7 +3,7 @@
    <head>
       <title> TRYING TO GET ANALYSER DATA</title> 
   </head>
-<body onmousemove="connectAudioToHtml()" >
+  <body>
 <p id="datatext"> hallo <p>
 </body>
 
@@ -15,13 +15,14 @@
 
    	var OSC1 = audioContext.createOscillator();
     OSC1.type ="sine";
-    OSC1.frequency.value = 120;
+    OSC1.frequency.value = 0.1;
 
     var analyser = audioContext.createAnalyser();
    analyser.fftSize = 2048;
   analyser.smoothingTimeConstant = 0.6;
    var bufferLength = analyser.frequencyBinCount;
    var dataArray = new Uint8Array(bufferLength);
+   
     
 
     var VCA = audioContext.createGain ();
@@ -40,11 +41,12 @@ function start (){
 
 start();
   
+  setInterval(
   function connectAudioToHtml () {
-  document.getElementById("datatext").innerHTML = dataArray;
+  document.getElementById("datatext").innerHTML = dataArray[1];
    analyser.getByteTimeDomainData(dataArray);
    console.log("tester =",dataArray[1]);
-  }
+  }, 30);
   
     // CHANGE OSC1 WAV
  
