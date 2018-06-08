@@ -13,21 +13,23 @@
    	var audioContext = new(window.AudioContext || window.webkitAudioContext) ();
 
 
-   	var VCA = audioContext.createGain ();
-
    	var OSC1 = audioContext.createOscillator();
-      OSC1.type ="sine";
-      OSC1.frequency.value = 1000;
+    OSC1.type ="sine";
+    OSC1.frequency.value = 1000;
 
-   
+    var analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
 
 
-      var VCA = audioContext.createGain ();
-      VCA.gain.value = 1;
+    var VCA = audioContext.createGain ();
+    VCA.gain.value = 1;
 
 
-      OSC1.connect(VCA);
-      VCA.connect(audioContext.destination); 
+    OSC1.connect(VCA);
+    VCA.connect(audioContext.destination); 
 
 
 
