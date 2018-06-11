@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+ <html>
+   <head>
+      <title> TRYING TO GET ANALYSER DATA</title> 
+      <style>
+      
+ /*#divtester
+{
+  width: 400px;
+  height: 300px;
+  position: absolute;
+  left: 20%;
+  top: 20%;
+  background-color:  rgba(0, 0, 255, 0.3)
+}*/
+
+#controls
+{
+  float: right;
+  z-index: 100;
+}
+
+p {
+  color: white;
+}
+
+h2 {
+  color: white;
+  font-size: 1em;
+}
+
+body{
+  background: black;
+}
+
+#image
+{
+ width: 1000px;
+  height: 600px;
+  z-index: -1;
+  pointer-events: none ;
+}
+
+</style>
+  </head>
+  <body>
+
+
+
+<img id="image" src="ny.jpg">
+
+<div id="controls" >
+
+<div class="slidecontainer">  <h2> IMG: MAIN OSC SPEED </h2> 
+  <input id="sliderOSC1" type="range" min="1" max="100000" value="1000" class="slider" oninput="OSC1SPEED()">
+  <p id="OSC1FREQ"> Waiting </p>
+</div>
+
+<div class="slidecontainer">  <h2> IMG: Perspective </h2> 
+  <input id="sliderKnob1" type="range" min="1" max="100" value="90" class="slider" oninput="Knob1Wiggler()">
+</div>
+
+<div class="slidecontainer">  <h2> IMG: Scale </h2> 
+  <input id="sliderKnob2" type="range" min="1" max="10" value="1" class="slider" oninput="Knob2Wiggler()">
+</div>
+
+<div class="slidecontainer">  <h2> IMG: Refresh Rate </h2> 
+  <input id="sliderKnob3" type="range" min="1" max="10000" value="10" class="slider" oninput="Knob3Wiggler()">
+</div>
+
+<div class="slidecontainer">  <h2> OSC OFFSET </h2> 
+  <input id="sliderKnob4" type="range" min="1" max="1000" value="1" class="slider" oninput="KnobOffset()">
+</div>
+
+<div class="slidecontainer">  <h2> IMG: LFO SPEED </h2> 
+  <input id="sliderLFO" type="range" min="1" max="10000" value="10" class="slider" oninput="LFOSPEED()">
+  <p id="LFOFREQ"> Waiting </p>
+</div>
+
+<div class="slidecontainer">  <h2> IMG: LFO DEPTH </h2> 
+  <input id="sliderLFODepth" type="range" min="1" max="3000" value="10" class="slider" oninput="LFODEPTH()">
+  <p id="LFPDEPTHAMOUNT"> Waiting </p>
+</div>
+
+<div class="slidecontainer">  <h2> OSC2 SPEED </h2> 
+  <input id="sliderOSC2" type="range" min="1" max="3900" value="100" class="slider" oninput="OSC2SPEED()">
+  <p id="OSC2FREQ"> Waiting </p>
+</div>
+
+<div class="slidecontainer">  <h2> OSC3 SPEED </h2> 
+  <input id="sliderOSC3" type="range" min="1" max="3900" value="100" class="slider" oninput="OSC3SPEED()">
+  <p id="OSC3FREQ"> Waiting </p>
+</div>
+
+
+</div>
+
+
+</body>
+
+
+ <script>
+   	var audioContext = new(window.AudioContext || window.webkitAudioContext) ();
+
+
+//////////////////////////////////MIDI/////////////////////START////////////////////////////////////////////////
+
+  var midi, data;
+// request MIDI access
+if (navigator.requestMIDIAccess) {
+    navigator.requestMIDIAccess({
+        sysex: false
+    }).then(onMIDISuccess, onMIDIFailure);
+} else {
+    alert("No MIDI support in your browser.");
+}
+
+// midi functions
+function onMIDISuccess(midiAccess) {
+    // when we get a succesful response, run this code
+    midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
+
+    var inputs = midi.inputs.values();
+    // loop over all available inputs and listen for any MIDI input
+    for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+        // each time there is a midi message call the onMIDIMessage function
+        input.value.onmidimessage = onMIDIMessage;
+    }
+}
+
+function onMIDIFailure(error) {
+    // when we get a failed response, run this code
+    console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
+}
+
+function onMIDIMessage(message) {
+    data = message.data; // this gives us our [command/channel, note, velocity] data.
+    var frequency = midiNoteToFrequency(message.data[1]);
+  
+    console.log('MIDI data', data); // MIDI data [144, 63, 73]
+   OSC3.frequency.value = parseInt(frequency) + parseInt(offset);
+    OSC2.frequency.value = frequency;
+    OSC1.frequency.value = frequency/10;
+    console.log(oscMidiFrequency);
+}
+
+
+function midiNoteToFrequency (note) {
+    return Math.pow(2, ((note - 69) / 12)) * 440;
+}
+
+ //////////////////////////////////MIDI/////////////////////OVER////////////////////////////////////////////////
+
+  
+
+    //OSC 1 - LFO and TIMER
+   	var OSC1 = audioContext.createOscillator();
+    OSC1.type ="sawtooth";
+    OSC1.frequency.value = 0.1;
+
+    //LFO 1 - FM-ing OSC 1
+    var LFO1 = audioContext.createOscillator();
+    LFO1.type ="sawtooth";
+    LFO1.frequency.value = 10;
+
+    // OSC 2
+    var OSC2 = audioContext.createOscillator();
+    OSC2.type ="sine";
+    OSC2.frequency.value = 100;
+
+    var OSC3 = audioContext.createOscillator();
+    OSC3.type ="sine";
+    OSC3.frequency.value = 100;
+
+    // ANALYSER
+    var analyser = audioContext.createAnalyser();
+   analyser.fftSize = 4096;
+  analyser.smoothingTimeConstant = 0.09;
+   var bufferLength = analyser.frequencyBinCount;
+   var dataArray = new Float32Array(analyser.frequencyBinCount); 
+   
+    var FMVCA = audioContext.createGain ();
+    FMVCA.gain.value = 150;
+
+   var  LFOVCA = audioContext.createGain ();
+    LFOVCA.gain.value = 10;
+
+    var VCA = audioContext.createGain ();
+    VCA.gain.value = 1;
+
+     var VCA2 = audioContext.createGain ();
+    VCA2.gain.value = 1;
+
+     var SUM = audioContext.createGain ();
+    SUM.gain.value = 1;
+
+    OSC2.connect(VCA);
+    OSC3.connect(VCA2);
+    OSC1.connect(FMVCA);
+    FMVCA.connect(OSC2.frequency);
+    FMVCA.connect(OSC3.frequency);
+    LFO1.connect(LFOVCA);
+    LFOVCA.connect(OSC1.frequency)
+    OSC1.connect(analyser);
+    VCA.connect(SUM);
+    VCA2.connect(SUM);
+    SUM.connect(audioContext.destination); 
+
+function start (){
+   	OSC1.start(0);
+    OSC2.start(0);
+    OSC3.start(0);
+    LFO1.start(0);
+  };
+start();
+
+/// KNOBS AND VALUES
+  
+var Knob1 = 90;
+var Knob2 = 1;
+var Knob3 = 10;
+var offset = 40;
+
+ setInterval(
+  function connectAudioToHtml () {
+
+  analyser.getFloatFrequencyData(dataArray);
+  /*document.getElementById("divtester").style.backgroundColor = "rgba("+ dataArray[2]*-1 +", 120," + dataArray[99]*-1 + ", 1)";
+  document.getElementById("divtester").style.transform = "rotate("+ dataArray[100]* -2 +"deg)";*/
+
+  /// CHANGE PERSPECTIVE
+
+  document.getElementById("image").style.transform = 
+  "rotateY("+ dataArray[1]*-1 +"deg)" + 
+  "rotateZ("+ dataArray[1]*-10 +"deg)" +
+  "perspective("+Knob1+"px)"+"scale("+Knob2+")"; 
+
+  // CHANGE CSS FILTERS
+ 
+  
+
+  document.getElementById("image").style.filter = 
+  "contrast("+ dataArray[1]*-12 +90+"%)" + 
+  "hue-rotate("+ dataArray[100]*-1 +"deg)" + 
+  "invert("+ dataArray[1000]*-1/60 +"%)"; 
+  
+
+
+  }, Knob3 );
+  
+
+  /// BUTTONS 
+
+  function Knob1Wiggler () {
+    var WiggledKnob1 = document.getElementById("sliderKnob1").value;
+    Knob1 = WiggledKnob1;
+  }
+
+  function Knob2Wiggler () {
+    var WiggledKnob2 = document.getElementById("sliderKnob2").value;
+    Knob2 = WiggledKnob2;
+  }
+
+function Knob3Wiggler () {
+    var WiggledKnob3 = document.getElementById("sliderKnob3").value;
+    Knob3 = WiggledKnob3;
+  }
+
+function KnobOffset () {
+    var WiggledKnob4 = document.getElementById("sliderKnob4").value;
+    offset = WiggledKnob4;
+  }
+
+  function OSC1SPEED () {
+var OSC1Frequency = document.getElementById("sliderOSC1").value/1000 ;
+OSC1.frequency.value = OSC1Frequency;
+document.getElementById("OSC1FREQ").innerHTML = OSC1Frequency;
+  }
+  
+    function LFOSPEED () {
+var LFOFrequency = document.getElementById("sliderLFO").value/400 ;
+LFO1.frequency.value = LFOFrequency;
+document.getElementById("LFOFREQ").innerHTML = LFOFrequency;
+  }
+
+    function OSC2SPEED () {
+var OSC2Frequency = document.getElementById("sliderOSC2").value ;
+OSC2.frequency.value = OSC2Frequency;
+document.getElementById("OSC2FREQ").innerHTML = OSC2Frequency;
+  }
+
+    function OSC3SPEED () {
+var OSC3Frequency = document.getElementById("sliderOSC3").value;
+OSC3.frequency.value = OSC3Frequency;
+document.getElementById("OSC3FREQ").innerHTML = OSC3Frequency;
+  }
+
+function LFODEPTH (){
+var FmAmount = document.getElementById("sliderLFODepth").value ;
+FMVCA.gain.value = FmAmount;
+document.getElementById("LFPDEPTHAMOUNT").innerHTML = FmAmount;
+};
+
+
+
+
+ </script>
+
+
+</html>
