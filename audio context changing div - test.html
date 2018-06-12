@@ -51,6 +51,11 @@ body{
 
 <div id="controls" >
 
+  <button id="OSCwave" > OSC1 WAVE </button>
+  <button id="OSC2wave" > OSC2 WAVE </button>
+  <button id="OSC3wave" > OSC3 WAVE </button>
+  <button id="FilterType" > Filter Type </button>
+ 
 <div class="slidecontainer">  <h2> IMG: MAIN OSC SPEED </h2> 
   <input id="sliderOSC1" type="range" min="1" max="100000" value="1000" class="slider" oninput="OSC1SPEED()">
   <p id="OSC1FREQ"> Waiting </p>
@@ -299,6 +304,104 @@ function LFODEPTH (){
 var FmAmount = document.getElementById("sliderLFODepth").value ;
 FMVCA.gain.value = FmAmount;
 document.getElementById("LFPDEPTHAMOUNT").innerHTML = FmAmount;
+};
+
+//////////////////////////////////SWITCHES///////////////////////////////////////////////////////////////////////
+  
+// CHANGE OSC1 WAVE
+
+function waveOsc1 () {
+
+
+switch(OSC1.type) {
+   case "sine":
+        OSC1.type ="sawtooth"
+        document.getElementById("OSCwave").innerHTML = "MOD OSC: SAW";
+        break;
+   case "sawtooth":
+        OSC1.type ="square"
+        document.getElementById("OSCwave").innerHTML = "MOD OSC: SQUARE";
+        break;
+   case "square":
+        OSC1.type ="sine"
+        document.getElementById("OSCwave").innerHTML = "OSC1: SINE";
+        break;
+    default:
+ OSC1.type = OSC1.type
+};
+};
+
+// CHANGE OSC2 WAVE
+
+function waveOsc2 () {
+
+
+switch(OSC2.type) {
+   case "sine":
+        OSC2.type ="sawtooth"
+        document.getElementById("OSC2wave").innerHTML = "MAIN OSC: SAW";
+        break;
+   case "sawtooth":
+        OSC2.type ="square"
+        document.getElementById("OSC2wave").innerHTML = "MAIN OSC: SQUARE";
+        break;
+   case "square":
+        OSC2.type ="sine"
+        document.getElementById("OSC2wave").innerHTML = "MAIN OSC: SINE";
+        break;
+    default:
+ OSC2.type = OSC2.type
+};
+};
+  
+// CHANGE OSC3 WAVE
+
+function waveOsc2 () {
+
+
+switch(OSC3.type) {
+   case "sine":
+        OSC3.type ="sawtooth"
+        document.getElementById("OSC3wave").innerHTML = " OSC 3: SAW";
+        break;
+   case "sawtooth":
+        OSC3.type ="square"
+        document.getElementById("OSC2wave").innerHTML = " OSC 3: SQUARE";
+        break;
+   case "square":
+        OSC3.type ="sine"
+        document.getElementById("OSC2wave").innerHTML = " OSC 3: SINE";
+        break;
+    default:
+ OSC3.type = OSC3.type
+};
+};
+
+// CHANGE FILTER TYPE
+
+function filterType () {
+
+
+switch(Filter.type) {
+   case "lowpass":
+        Filter.type ="highpass"
+        document.getElementById("FilterType").innerHTML = "FILTER: HIGHPASS";
+        break;
+   case "highpass":
+        Filter.type ="bandpass"
+        document.getElementById("FilterType").innerHTML = "FILTER: BANDPASS";
+        break;
+   case "bandpass":
+        Filter.type ="notch"
+        document.getElementById("FilterType").innerHTML = "FILTER: NOTCH";
+        break;
+    case "notch":
+        Filter.type ="lowpass"
+        document.getElementById("FilterType").innerHTML = "FILTER: LOWPASS";
+        break;            
+    default:
+ Filter.type = Filter.type
+};
 };
 
 
