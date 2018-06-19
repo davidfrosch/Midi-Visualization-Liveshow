@@ -1,2 +1,3 @@
-# Web Audio API Experiments
-Synth Experiments using the Web Audio API
+# Analyzer Visualisation Tool + Midi Implementation
+
+Work in Progress
